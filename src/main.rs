@@ -1,5 +1,10 @@
+use std::io::stdin;
 
 fn main() {
+    let items: Vec<String> = stdin().lines()
+        .filter_map(|line| line.ok())
+        .collect();
+
     let distance = levenshtein_distance("hallo wxlt".to_string(), "hallo welt".to_string());
     println!("{distance}");
 }
