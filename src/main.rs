@@ -1,12 +1,67 @@
-use std::io::stdin;
+use std::{io::{stdin, stdout}, thread, sync::mpsc::{self, Receiver}, time::Duration};
 
-fn main() {
-    let items: Vec<String> = stdin().lines()
-        .filter_map(|line| line.ok())
-        .collect();
+use ratatui::{Terminal, prelude::CrosstermBackend, widgets::{List, ListItem}};
+use crossterm::{execute, terminal::{EnterAlternateScreen, enable_raw_mode, disable_raw_mode, LeaveAlternateScreen}, event::{EnableMouseCapture, DisableMouseCapture, self, KeyEvent, KeyCode}, cursor::{SetCursorShape, CursorShape}};
+
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+fn spawn_key_listener() -> Result<Receiver<KeyEvent>> {
+    let (tx, rx) = mpsc::channel();
+    thread::spawn(move || {
+        loop {
+            if event::poll(Duration::from_millis(50)).unwrap() {
+                if let event::Event::Key(key_event) = event::read().unwrap() {
+                    tx.send(key_event).unwrap();
+                }
+            }
+        }
+    });
+
+    Ok(rx)
+}
+
+
+fn main() -> Result<()> {
+    execute!(stdout(), EnterAlternateScreen, EnableMouseCapture, SetCursorShape(CursorShape::Block))?;
+
+    let backend = CrosstermBackend::new(stdout());
+    let mut terminal = Terminal::new(backend)?;
+    terminal.clear()?;
+    enable_raw_mode()?;
+
+    //let items: Vec<String> = stdin().lines()
+    //    .filter_map(|line| line.ok())
+    //    .collect();
+    let items = vec![String::from("hallo"),String::from("kek"),String::from("welt")];
 
     let distance = levenshtein_distance("hallo wxlt".to_string(), "hallo welt".to_string());
-    println!("{distance}");
+    //println!("{distance}");
+
+
+    let rx = spawn_key_listener()?;
+
+    loop {
+        terminal.draw(|f| {
+            let list_items: Vec<ListItem> = items.iter().map(|s| ListItem::new(s.clone())).collect();
+            let list: List = List::new(list_items);
+            f.render_widget(list, f.size())
+        })?;
+
+        if let Ok(key_event) = rx.recv() {
+            match key_event.code {
+                KeyCode::Esc => break,
+                KeyCode::Enter => return Ok(()),
+                _ => {}
+            }
+        }
+    }
+
+    disable_raw_mode()?;
+    terminal.show_cursor()?;
+
+    execute!(stdout(), LeaveAlternateScreen, DisableMouseCapture)?;
+
+    Ok(())
 }
 
 fn levenshtein_distance(u: String, v: String) -> u32 {
