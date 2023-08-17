@@ -2,3 +2,8 @@
 name = "rustic-fuzz"
 version = "0.1.0"
 edition = "2021"
+description = "A Rust crate for sorting strings based on their Levenshtein distance to a reference string."
+authors = ["Maurice Schmidt <mvmogo@gmail.com>"]
+license = "MIT"
+keywords = ["fuzzy-sort", "string-sorting", "levenshtein-distance", "levenshtein", "text-processing", "algorithm"]
+categories = ["Algorithms", "Text Processing"]
