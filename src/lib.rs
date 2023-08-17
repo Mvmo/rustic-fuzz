@@ -1,11 +1,11 @@
-fn fuzzy_sort(to_sort: Vec<String>, input: &str) -> Vec<String> {
+pub fn fuzzy_sort(to_sort: Vec<String>, input: &str) -> Vec<String> {
     let mut clone = to_sort.clone();
     clone.sort_by_key(|s| levenshtein_distance(s, input));
 
     clone
 }
 
-fn fuzzy_sort_in_place(to_sort: &mut Vec<String>, input: &str) {
+pub fn fuzzy_sort_in_place(to_sort: &mut Vec<String>, input: &str) {
     to_sort.sort_by_key(|s| levenshtein_distance(s, input));
 }
 
