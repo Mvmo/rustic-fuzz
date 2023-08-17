@@ -1,3 +1,10 @@
+fn fuzzy_sort(to_sort: Vec<String>, input: &str) -> Vec<String> {
+    let mut clone = to_sort.clone();
+    clone.sort_by_key(|s| levenshtein_distance(s, input));
+
+    clone
+}
+
 fn levenshtein_distance(u: &str, v: &str) -> u32 {
     let u_chars: Vec<char> = u.chars().collect();
     let v_chars: Vec<char> = v.chars().collect();
@@ -26,6 +33,15 @@ fn levenshtein_distance(u: &str, v: &str) -> u32 {
     }
 
     return d[m - 1][n - 1] as u32;
+}
+
+#[test]
+fn fuzzy_sort_test() {
+    let arr = vec!["xxx".to_string(), "yyy".to_string(), "xx".to_string()];
+    let str = "xxx";
+
+    let sorted = fuzzy_sort(arr, str);
+    assert_eq!(vec!["xxx", "xx", "yyy"], sorted);
 }
 
 #[test]
