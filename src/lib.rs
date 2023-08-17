@@ -1,4 +1,4 @@
-fn levenshtein_distance(u: String, v: String) -> u32 {
+fn levenshtein_distance(u: &str, v: &str) -> u32 {
     let u_chars: Vec<char> = u.chars().collect();
     let v_chars: Vec<char> = v.chars().collect();
 
@@ -26,4 +26,18 @@ fn levenshtein_distance(u: String, v: String) -> u32 {
     }
 
     return d[m - 1][n - 1] as u32;
+}
+
+#[test]
+fn levenshtein_distance_test() {
+    vec![
+        ("hello, world", "hello- world", 1),
+        ("murice", "maurice", 1),
+        ("delete", "insert", 5),
+        ("Tier", "Tor", 2)
+    ].iter()
+    .for_each(|(u, v, expected_distance)| {
+        let distance = levenshtein_distance(u, v);
+        assert_eq!(distance, *expected_distance as u32);
+    });
 }
