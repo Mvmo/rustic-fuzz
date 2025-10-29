@@ -1,20 +1,21 @@
-pub fn fuzzy_sort(to_sort: Vec<String>, input: &str) -> Vec<String> {
-    let mut clone = to_sort.clone();
-    clone.sort_by_key(|s| levenshtein_distance(s, input));
+pub fn fuzzy_sort<T: AsRef<str> + Clone>(to_sort: &[T], input: &str) -> Vec<T> {
+    let mut clone: Vec<T> = to_sort.to_vec();
+    let input_chars: Vec<char> = input.chars().collect();
+    clone.sort_by_key(|s| levenshtein_distance(s.as_ref(), &input_chars));
 
     clone
 }
 
-pub fn fuzzy_sort_in_place(to_sort: &mut Vec<String>, input: &str) {
-    to_sort.sort_by_key(|s| levenshtein_distance(s, input));
+pub fn fuzzy_sort_in_place<T: AsRef<str>>(to_sort: &mut [T], input: &str) {
+    let input_chars: Vec<char> = input.chars().collect();
+    to_sort.sort_by_key(|s| levenshtein_distance(s.as_ref(), &input_chars));
 }
 
-fn levenshtein_distance(u: &str, v: &str) -> u32 {
+fn levenshtein_distance(u: &str, v_chars: &[char]) -> u32 {
     let u_chars: Vec<char> = u.chars().collect();
-    let v_chars: Vec<char> = v.chars().collect();
 
     let m = u.len() + 1;
-    let n = v.len() + 1;
+    let n = v_chars.len() + 1;
 
     let mut d = vec![vec![0; n]; m];
 
@@ -58,8 +59,12 @@ fn fuzzy_sort_test() {
     ];
 
     test_cases.iter().for_each(|(arr, input, expected_sorted)| {
-        let sorted = fuzzy_sort(arr.clone(), input);
+        let sorted = fuzzy_sort(&arr, input);
         assert_eq!(sorted, *expected_sorted);
+
+        let mut mutarr = arr.clone();
+        fuzzy_sort_in_place(mutarr.as_mut(), input);
+        assert_eq!(mutarr, *expected_sorted);
     });
 }
 
@@ -73,7 +78,7 @@ fn levenshtein_distance_test() {
         ("banana", "cherry", 6)
     ].iter()
     .for_each(|(u, v, expected_distance)| {
-        let distance = levenshtein_distance(u, v);
+        let distance = levenshtein_distance(u, &v.chars().collect::<Vec<_>>());
         assert_eq!(distance, *expected_distance as u32);
     });
 }
