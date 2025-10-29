@@ -30,9 +30,7 @@ fn levenshtein_distance(u: &str, v: &str) -> u32 {
             let insert_score = d[i][j - 1] + 1;
             let delete_score = d[i - 1][j] + 1;
 
-            d[i][j] = *vec![replacement_score, insert_score, delete_score].iter()
-                .min()
-                .unwrap();
+            d[i][j] = replacement_score.min(insert_score).min(delete_score);
         }
     }
 
